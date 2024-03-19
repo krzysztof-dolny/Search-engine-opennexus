@@ -4,7 +4,8 @@
 ```commandline
 pip3 install -r requirements.txt
 ```
-### 3. run 'run.py' file (first time might take longer)
+### 3.It also requires the command-line tool ffmpeg to be installed on your system
+### 4. run 'run.py' file (first time might take longer)
 
 
 

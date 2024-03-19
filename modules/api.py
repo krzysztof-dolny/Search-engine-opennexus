@@ -26,7 +26,7 @@ def submit_link():
     if request.method == 'POST':
         link: str = request.form['link']
 
-        scraped_text: str = Scrapper.scrape_text_from_link2(link)
+        scraped_text: str = Scrapper.scrape_text(link)
 
         collection.add(
             documents=[scraped_text],
