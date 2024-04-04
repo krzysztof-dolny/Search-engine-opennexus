@@ -1,0 +1,23 @@
+.result {
+    width: 100%;
+    border: 1px solid #ccc;
+    padding: 10px;
+    box-sizing: border-box;
+    border-radius: 5px;
+}
+
+.container {
+    padding-bottom: 10px;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+h1 {
+    margin-top: 10px;
+}
+
+.red {
+    color: rgb(203, 50, 50);
+}

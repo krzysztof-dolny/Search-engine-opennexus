@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% set active_page = 'index' %}
+{% block content %}
+
+<div class="container">
+    <h1>Twoje Query:</h1>
+    <form action="/" method="get" class="d-flex align-items-center">
+        <input type="text" name="query" class="w-100 form-control" placeholder="Fraza wyszukiwania">
+        <input type="submit" value="Szukaj" class="btn btn-primary ms-1">
+    </form>
+    
+    
+    {% if result is defined %}
+    <h1>Wynik:</h1>
+    <div class="result">{{ result }}</div>
+    {% endif %}
+</div>
+
+
+{% endblock %}
