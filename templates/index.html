@@ -3,7 +3,7 @@
 {% block content %}
 
 <div class="container">
-    <h1>Twoje Query:</h1>
+    <h1>Twoje zapytanie:</h1>
     <form action="/" method="get" class="d-flex align-items-center">
         <input type="text" name="query" class="w-100 form-control" placeholder="Fraza wyszukiwania">
         <input type="submit" value="Szukaj" class="btn btn-primary ms-1">
@@ -12,7 +12,27 @@
     
     {% if result is defined %}
     <h1>Wynik:</h1>
-    <div class="result">{{ result }}</div>
+    <div class="result">
+        {% for i in range(result['ids'][0]|length) %}
+            {% set id = result['ids'][0][i] %}
+            {% set distance = result['distances'][0][i] %}
+            {% set metadata = result['metadatas'][0][i] %}
+            {% set document = result['documents'][0][i] %}
+            
+            <div class="alert">
+                <h3><a href="{{ metadata['source'] }}" class="alert-link">{{ id }}</a></h3>
+                <p><span class="badge badge-distance" title="{{ distance }} (distance)">{{ '%.4f'|format(distance) }}</span></p>
+                <p>{{ document|truncate(500) }}</p>
+                <p>
+                    <span class="badge badge-tag">tag_1</span>
+                    <span class="badge badge-tag">tag_2</span>
+                    <span class="badge badge-tag">tag_3</span>
+                    <span class="badge badge-tag">...</span>
+                </p>
+                <hr>
+            </div>
+        {% endfor %}
+    </div>
     {% endif %}
 </div>
 

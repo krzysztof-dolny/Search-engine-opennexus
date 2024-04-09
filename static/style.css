@@ -21,3 +21,18 @@ h1 {
 .red {
     color: rgb(203, 50, 50);
 }
+
+.badge-distance {
+    background-color: #eee;
+    color: black;
+    font-weight: initial;
+}
+
+.badge-tag {
+    background-color: #aaa;
+    font-weight: initial;
+}
+
+.alert-link {
+    text-decoration: none;
+}
