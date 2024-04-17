@@ -20,7 +20,7 @@
             {% set document = result['documents'][0][i] %}
             
             <div class="alert">
-                <h3><a href="{{ metadata['source'] }}" class="alert-link">{{ id }}</a></h3>
+                <h3><a href="{{ metadata['source'] }}" class="alert-link">{{ metadata.title }}</a></h3>
                 <p><span class="badge badge-distance" title="{{ distance }} (distance)">{{ '%.4f'|format(distance) }}</span></p>
                 <p>{{ document|truncate(500) }}</p>
                 <p>

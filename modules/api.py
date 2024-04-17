@@ -1,3 +1,5 @@
+import os
+import tempfile
 from datetime import datetime, timedelta
 import random
 from app import app, mail, db
@@ -112,14 +114,36 @@ def panel():
 def submit_link():
     if request.method == 'POST':
         link: str = request.form['link']
+        date: str = request.form['date']
 
-        scraped_text: str = Scrapper.scrape_text(link)
+        args = Scrapper.scrape_text_from_link(link)
 
         collection.add(
-            documents=[scraped_text],
-            metadatas=[{'source': link}],
+            documents=[args[0]],
+            metadatas=[{'source': link, 'title': args[1], 'date': date, 'file_type': args[2]}],
             ids=[str(collection.count())]
         )
+
+        return redirect('/panel')
+
+@app.route('/upload_file', methods=['POST'])
+def upload_file():
+    if request.method == 'POST':
+        file = request.files['file']
+        date = request.form['date']
+        name, extension = os.path.splitext(file.filename)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = os.path.join(temp_dir, file.filename)
+            file.save(file_path)
+            scraped_text = Scrapper.scrape_text_from_file(file_path)
+
+            if scraped_text:
+                collection.add(
+                    documents=[scraped_text],
+                    metadatas=[{'source': file.filename, 'title': name, 'date': date, 'file_type': extension}],
+                    ids=[str(collection.count())]
+                )
 
         return redirect('/panel')
 
