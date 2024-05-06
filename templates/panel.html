@@ -3,19 +3,35 @@
 
 <div class="container">
     <h1>Wprowadź link do indeksowania:</h1>
-    <form action="/submit_link" method="post" class="d-flex align-items-center">
-        <input type="url" name="link" class="w-100 form-control" placeholder="https://" required>
-        <input type="date" name="date" class="form-control ms-1" required>
-        <input type="submit" value="Dodaj" class="btn btn-primary ms-1">
+    <form action="/submit_link" method="post">
+        <div class="d-flex align-items-center mb-2">
+            <input type="url" name="link" class="form-control ms-1" style="width: 75%;" placeholder="https://" required>
+            <input type="date" name="date" class="form-control ms-1" required style="width: 25%;">
+        </div>
+        <div class="d-flex align-items-center mb-2">
+            <input type="text" name="tags" class="form-control ms-1" style="width: 20%;" placeholder="Dodaj tag">
+            <button type="button" id="add-tags-btn-link" class="btn btn-secondary ms-1" style="width: 10%;">Dodaj tag</button>
+            <span id="tags-display-link" class="ms-1 border form-control" style="width: 50%;">Dodane tagi:</span>
+            <button type="button" id="remove-all-tags-link" class="btn btn-danger ms-1" style="width: 10%;">Usuń tagi</button>
+            <input type="submit" value="Dodaj" class="btn btn-primary ms-1" style="width: 10%;">
+        </div>
     </form>
 
     <h1>Prześlij plik do indeksowania:</h1>
-    <form action="/upload_file" method="post" enctype="multipart/form-data" class="d-flex align-items-center">
-        <input type="file" name="file" required>
-        <input type="date" name="date" class="form-control ms-1" required>
-        <input type="submit" value="Upload">
+    <form action="/upload_file" method="post" enctype="multipart/form-data">
+        <div class="d-flex align-items-center mb-2">
+            <input type="file" name="file" class="form-control ms-1" style="width: 75%;" required>
+            <input type="date" name="date" class="form-control ms-1" required style="width: 25%;">
+        </div>
+        <div class="d-flex align-items-center mb-2">
+            <input type="text" name="tags" class="form-control ms-1" style="width: 20%;" placeholder="Dodaj tag">
+            <button type="button" id="add-tags-btn-file" class="btn btn-secondary ms-1" style="width: 10%;">Dodaj tag</button>
+            <span id="tags-display-file" class="ms-1 border form-control" style="width: 50%;">Dodane tagi:</span>
+            <button type="button" id="remove-all-tags-file" class="btn btn-danger ms-1" style="width: 10%;">Usuń tagi</button>
+            <input type="submit" value="Dodaj" class="btn btn-primary ms-1" style="width: 10%;">
+        </div>
     </form>
-    
+
     <h1>Automatyczne wprowadzenie danych:</h1>
     <form action="/add_test_data" method="post">
         <input type="submit" value="Załaduj testowe dane" class="btn btn-primary">
@@ -50,5 +66,63 @@
         {% endfor %}
       </ul>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var addTagsBtnLink = document.getElementById('add-tags-btn-link');
+        var removeAllTagsBtnLink = document.getElementById('remove-all-tags-link');
+        var tagsInputLink = document.querySelector('form[action="/submit_link"] input[name="tags"]');
+        var tagsListLink = document.getElementById('tags-display-link');
+        var tagsArrayLink = [];
+
+        addTagsBtnLink.addEventListener('click', function() {
+            var tagValue = tagsInputLink.value.trim();
+            if (tagValue !== '') {
+                tagsArrayLink.push(tagValue);
+                updateTagsDisplay(tagsListLink, tagsArrayLink);
+                tagsInputLink.value = '';
+            }
+        });
+
+        removeAllTagsBtnLink.addEventListener('click', function() {
+            tagsArrayLink = [];
+            updateTagsDisplay(tagsListLink, tagsArrayLink);
+        });
+
+        document.querySelector('form[action="/submit_link"]').addEventListener('submit', function() {
+            document.querySelector('form[action="/submit_link"] input[name="tags"]').value = tagsArrayLink.join(' ');
+        });
+
+        var addTagsBtnFile = document.getElementById('add-tags-btn-file');
+        var removeAllTagsBtnFile = document.getElementById('remove-all-tags-file');
+        var tagsInputFile = document.querySelector('form[action="/upload_file"] input[name="tags"]');
+        var tagsListFile = document.getElementById('tags-display-file');
+        var tagsArrayFile = [];
+
+        addTagsBtnFile.addEventListener('click', function() {
+            var tagValue = tagsInputFile.value.trim();
+            if (tagValue !== '') {
+                tagsArrayFile.push(tagValue);
+                updateTagsDisplay(tagsListFile, tagsArrayFile);
+                tagsInputFile.value = '';
+            }
+        });
+
+        removeAllTagsBtnFile.addEventListener('click', function() {
+            tagsArrayFile = [];
+            updateTagsDisplay(tagsListFile, tagsArrayFile);
+        });
+
+        document.querySelector('form[action="/upload_file"]').addEventListener('submit', function() {
+            document.querySelector('form[action="/upload_file"] input[name="tags"]').value = tagsArrayFile.join(' ');
+        });
+
+        function updateTagsDisplay(tagsList, tagsArray) {
+            tagsList.textContent = 'Dodane tagi: ' + tagsArray.join(', ');
+        }
+
+    });
+</script>
+
 
 {% endblock %}

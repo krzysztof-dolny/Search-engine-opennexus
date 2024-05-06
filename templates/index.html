@@ -6,10 +6,17 @@
     <h1>Twoje zapytanie:</h1>
     <form action="/" method="get" class="d-flex align-items-center">
         <input type="text" name="query" class="w-100 form-control" placeholder="Fraza wyszukiwania">
+
+        <select name="date_filter" class="form-select ms-1">
+            <option value="last_month" {% if request.args.get('date_filter') == 'last_month' %} selected {% endif %}>Ostatni miesiąc</option>
+            <option value="last_year" {% if request.args.get('date_filter') == 'last_year' %} selected {% endif %}>Ostatni rok</option>
+            <option value="last_3_years" {% if request.args.get('date_filter') == 'last_3_years' %} selected {% endif %}>Ostatnie 3 lata</option>
+            <option value="all" {% if request.args.get('date_filter') == 'all' %} selected {% endif %}>Wszystkie</option>
+        </select>
+
         <input type="submit" value="Szukaj" class="btn btn-primary ms-1">
     </form>
-    
-    
+
     {% if result is defined %}
     <h1>Wynik:</h1>
     <div class="result">
@@ -18,23 +25,29 @@
             {% set distance = result['distances'][0][i] %}
             {% set metadata = result['metadatas'][0][i] %}
             {% set document = result['documents'][0][i] %}
-            
-            <div class="alert">
-                <h3><a href="{{ metadata['source'] }}" class="alert-link">{{ metadata.title }}</a></h3>
-                <p><span class="badge badge-distance" title="{{ distance }} (distance)">{{ '%.4f'|format(distance) }}</span></p>
-                <p>{{ document|truncate(500) }}</p>
-                <p>
-                    <span class="badge badge-tag">tag_1</span>
-                    <span class="badge badge-tag">tag_2</span>
-                    <span class="badge badge-tag">tag_3</span>
-                    <span class="badge badge-tag">...</span>
-                </p>
-                <hr>
-            </div>
+
+            {% set selected_date = request.args.get('date_filter') %}
+            {% set selected_date_ranges = {'last_month': 30, 'last_year': 365, 'last_3_years': 1095} %}
+            {% set current_date = parse_date(current_date()) %}
+
+           {% if selected_date == 'all' or
+                (selected_date in selected_date_ranges and parse_date(metadata.date) >= (current_date - timedelta(days=selected_date_ranges[selected_date]))) %}
+                <div class="alert">
+                    <h3><a href="{{ metadata['source'] }}" class="alert-link">{{ metadata.title }}</a></h3>
+                    <p><span class="badge badge-distance" title="{{ distance }} (distance)">{{ '%.4f'|format(distance) }}</span></p>
+                    <p>{{ document|truncate(500) }}</p>
+                    <p>
+                        <span class="badge badge-tag">tag_1</span>
+                        <span class="badge badge-tag">tag_2</span>
+                        <span class="badge badge-tag">tag_3</span>
+                        <span class="badge badge-tag">...</span>
+                    </p>
+                    <hr>
+                </div>
+            {% endif %}
         {% endfor %}
     </div>
     {% endif %}
 </div>
-
 
 {% endblock %}

@@ -28,7 +28,7 @@ def index():
         app.logger.info('hello')
         result = collection.query(
             query_texts=[request.args.get('query')],
-            n_results=3,
+            n_results=5,
             include=['documents', 'distances', 'metadatas']
         )
         return render_template('index.html', result=result)
@@ -97,6 +97,15 @@ def get_all_urls():
         lambda meta: meta['source'],
         data
     )
+
+def get_all_tags():
+    data = collection.get(include=['metadatas'])['metadatas']
+
+    return map(
+        lambda meta: meta['tags'],
+        data
+    )
+
 def get_all_emails():
     return map(
         lambda user: user.email,
@@ -106,7 +115,7 @@ def get_all_emails():
 @app.route('/panel', methods=['GET'])
 @login_required
 def panel():
-    return render_template('panel.html', urls=get_all_urls(), emails=get_all_emails())
+    return render_template('panel.html', urls=get_all_urls(), tags=get_all_tags(), emails=get_all_emails())
 
 # Add link
 @app.route('/submit_link', methods=['POST'])
@@ -115,12 +124,13 @@ def submit_link():
     if request.method == 'POST':
         link: str = request.form['link']
         date: str = request.form['date']
+        tags = request.form['tags']
 
         args = Scrapper.scrape_text_from_link(link)
 
         collection.add(
-            documents=[args[0]],
-            metadatas=[{'source': link, 'title': args[1], 'date': date, 'file_type': args[2]}],
+            documents=[tags + " " + args[0]],
+            metadatas=[{'source': link, 'title': args[1], 'date': date, 'file_type': args[2], 'tags': tags}],
             ids=[str(collection.count())]
         )
 
@@ -131,6 +141,8 @@ def upload_file():
     if request.method == 'POST':
         file = request.files['file']
         date = request.form['date']
+        tags = request.form['tags']
+
         name, extension = os.path.splitext(file.filename)
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -140,8 +152,8 @@ def upload_file():
 
             if scraped_text:
                 collection.add(
-                    documents=[scraped_text],
-                    metadatas=[{'source': file.filename, 'title': name, 'date': date, 'file_type': extension}],
+                    documents=[tags + " " + scraped_text],
+                    metadatas=[{'source': file.filename, 'title': name, 'date': date, 'file_type': extension, 'tags': tags}],
                     ids=[str(collection.count())]
                 )
 
@@ -172,4 +184,17 @@ def register():
             db.session.add(user)
             db.session.commit()
         return redirect('/panel')
-    
+
+
+@app.context_processor
+def utility_processor():
+    def current_date():
+        return datetime.now().strftime('%Y-%m-%d')
+
+    def parse_date(date_str):
+        return datetime.strptime(date_str, '%Y-%m-%d')
+
+    def get_timedelta(days):
+        return timedelta(days=days)
+
+    return dict(current_date=current_date, parse_date=parse_date, timedelta=get_timedelta)
