@@ -1,0 +1,12 @@
+services:
+  app:
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - ".:/app"
+    tty: true
+    stdin_open: true
+    ports:
+      - "1401:6969"
+    restart: always
