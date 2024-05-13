@@ -34,14 +34,15 @@
                 (selected_date in selected_date_ranges and parse_date(metadata.date) >= (current_date - timedelta(days=selected_date_ranges[selected_date]))) %}
                 <div class="alert">
                     <h3><a href="{{ metadata['source'] }}" class="alert-link">{{ metadata.title }}</a></h3>
-                    <p><span class="badge badge-distance" title="{{ distance }} (distance)">{{ '%.4f'|format(distance) }}</span></p>
+                    <p><span class="badge badge-distance">{{ metadata.date }}</span></p>
+                    <!-- <p><span class="badge badge-distance" title="{{ distance }} (distance)">{{ '%.4f'|format(distance) }}</span></p> -->
                     <p>{{ document|truncate(500) }}</p>
-                    <p>
+                    <!-- <p>
                         <span class="badge badge-tag">tag_1</span>
                         <span class="badge badge-tag">tag_2</span>
                         <span class="badge badge-tag">tag_3</span>
                         <span class="badge badge-tag">...</span>
-                    </p>
+                    </p> -->
                     <hr>
                 </div>
             {% endif %}
