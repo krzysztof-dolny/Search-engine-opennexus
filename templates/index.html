@@ -5,16 +5,22 @@
 <div class="container">
     <h1>Twoje zapytanie:</h1>
     <form action="/" method="get" class="d-flex align-items-center">
-        <input type="text" name="query" class="w-100 form-control" placeholder="Fraza wyszukiwania">
+        <input type="text" name="query" class="form-control ms-1" placeholder="Fraza wyszukiwania" style="width: 50%;">
 
-        <select name="date_filter" class="form-select ms-1">
+        <select name="file_type_filter" class="form-select ms-1" style="width: 20%;">
+            <option value="article" {% if request.args.get('file_type_filter') == 'article' %} selected {% endif %}>Artykuł</option>
+            <option value="video" {% if request.args.get('file_type_filter') == 'video' %} selected {% endif %}>Wideo</option>
+            <option value="all" {% if request.args.get('file_type_filter') == 'all' %} selected {% endif %}>Wszystkie</option>
+        </select>
+
+        <select name="date_filter" class="form-select ms-1" style="width: 20%;">
             <option value="last_month" {% if request.args.get('date_filter') == 'last_month' %} selected {% endif %}>Ostatni miesiąc</option>
             <option value="last_year" {% if request.args.get('date_filter') == 'last_year' %} selected {% endif %}>Ostatni rok</option>
             <option value="last_3_years" {% if request.args.get('date_filter') == 'last_3_years' %} selected {% endif %}>Ostatnie 3 lata</option>
             <option value="all" {% if request.args.get('date_filter') == 'all' %} selected {% endif %}>Wszystkie</option>
         </select>
 
-        <input type="submit" value="Szukaj" class="btn btn-primary ms-1">
+        <input type="submit" value="Szukaj" class="btn btn-primary ms-1" style="width: 10%;">
     </form>
 
     {% if result is defined %}
@@ -26,26 +32,30 @@
             {% set metadata = result['metadatas'][0][i] %}
             {% set document = result['documents'][0][i] %}
 
+            {% set selected_file_type = request.args.get('file_type_filter') %}
             {% set selected_date = request.args.get('date_filter') %}
             {% set selected_date_ranges = {'last_month': 30, 'last_year': 365, 'last_3_years': 1095} %}
             {% set current_date = parse_date(current_date()) %}
 
            {% if selected_date == 'all' or
-                (selected_date in selected_date_ranges and parse_date(metadata.date) >= (current_date - timedelta(days=selected_date_ranges[selected_date]))) %}
-                <div class="alert">
-                    <h3><a href="{{ metadata['source'] }}" class="alert-link">{{ metadata.title }}</a></h3>
-                    <p><span class="badge badge-distance">{{ metadata.date }}</span></p>
-                    <!-- <p><span class="badge badge-distance" title="{{ distance }} (distance)">{{ '%.4f'|format(distance) }}</span></p> -->
-                    <p>{{ document|truncate(500) }}</p>
-                    <!-- <p>
-                        <span class="badge badge-tag">tag_1</span>
-                        <span class="badge badge-tag">tag_2</span>
-                        <span class="badge badge-tag">tag_3</span>
-                        <span class="badge badge-tag">...</span>
-                    </p> -->
-                    <hr>
-                </div>
-            {% endif %}
+                (selected_date in selected_date_ranges and parse_date(metadata.date) >=
+                (current_date - timedelta(days=selected_date_ranges[selected_date]))) %}
+               {% if selected_file_type == 'all' or selected_file_type == metadata['file_type'] %}
+                    <div class="alert">
+                        <h3><a href="{{ metadata['source'] }}" class="alert-link">{{ metadata.title }}</a></h3>
+                        <p><span class="badge badge-distance">{{ metadata.date }}</span></p>
+                        <!-- <p><span class="badge badge-distance" title="{{ distance }} (distance)">{{ '%.4f'|format(distance) }}</span></p> -->
+                        <p>{{ metadata['text']|truncate(500) }}</p>
+                        <!-- <p>
+                            <span class="badge badge-tag">tag_1</span>
+                            <span class="badge badge-tag">tag_2</span>
+                            <span class="badge badge-tag">tag_3</span>
+                            <span class="badge badge-tag">...</span>
+                        </p> -->
+                        <hr>
+                    </div>
+               {% endif %}
+           {% endif %}
         {% endfor %}
     </div>
     {% endif %}

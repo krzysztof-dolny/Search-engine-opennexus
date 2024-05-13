@@ -17,16 +17,16 @@ class Scrapper:
         # print(parsed_url.netloc)
         if parsed_url.netloc == 'przetargowa.pl' and parsed_url.path.startswith('/'):
             lista = Scrapper.scrape_text_from_przetargowa_article(link)
-            lista.append("article_link")
+            lista.append("article")
             return lista
         elif parsed_url.netloc == 'www.youtube.com' and parsed_url.path.startswith('/watch'):
             lista = Scrapper.scrape_text_from_youtube_video(link)
-            lista.append("youtube_link")
+            lista.append("video")
             return lista
         else:
             # Default scrapper function - for now
             if link:
-                return Scrapper.scrape_text_from_article(link), "article_link"
+                return Scrapper.scrape_text_from_article(link), "article"
 
     @staticmethod
     def scrape_text_from_file(file_path):
@@ -67,7 +67,7 @@ class Scrapper:
             if response.status_code == 200:
                 soup = BeautifulSoup(response.text, 'html.parser')
                 title = soup.find('h1', class_='tdb-title-text').text
-                elements = soup.find_all(re.compile(r'^h[1-2]$|^p$|^ul$|^ol$'))
+                elements = soup.find_all(re.compile(r'^h2$|^p$|^ul$|^ol$'))
                 text_list = []
 
                 for el in elements:

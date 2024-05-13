@@ -14,15 +14,19 @@
     <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-links-list" role="tabpanel" aria-labelledby="nav-links-list-tab">
             <h1>Wprowadzone materiały</h1>
-            <ul class="list-group">
-                {% for url in urls %}
-                <li class="list-group-item">
-                    <a href="{{ url }}" target="_blank">
-                        {{ url }}
-                    </a>
-                </li>
-                {% endfor %}
-            </ul>
+            <form action="/delete_link" method="post">
+                <ul class="list-group">
+                    {% for url in urls %}
+                        <li class="list-group-item">
+                            <a href="{{ url }}" target="_blank">
+                                {{ url }}
+                            </a>
+                            <button type="submit" name="url" value="{{ url }}"
+                                class="btn btn-sm btn-danger float-end">Usuń</button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </form>
 
             <div class="my-2">
                 <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-link">
@@ -109,7 +113,7 @@
                                                     style="width: 40%;">Dodaj tag</button>
                                             </div>
                                             <div class="d-flex align-items-center mb-2">
-                                                <span id="tags-display-link" class="ms-1 border form-control">Dodane tagi:</span>
+                                                <span id="tags-display-file" class="ms-1 border form-control">Dodane tagi:</span>
                                                 <button type="button" id="remove-all-tags-file" class="btn btn-danger ms-1"
                                                     style="width: 40%;">Usuń tagi</button>
                                             </div>
@@ -126,13 +130,6 @@
                     </div>
                 </div>
             </div>
-            
-            <div class="my-2">
-                <form action="/add_test_data" method="post">
-                    <input type="submit" value="Załaduj testowe dane" class="btn btn-primary">
-                </form>
-            </div>
-
         </div>
 
         <div class="tab-pane fade" id="nav-admins" role="tabpanel" aria-labelledby="nav-admins-tab">
@@ -174,61 +171,72 @@
                 </div>
             </div>
         </div>
-
     </div>
-    <script>
+</div>
+
+<script>
     document.addEventListener("DOMContentLoaded", function() {
-            var addTagsBtnLink = document.getElementById('add-tags-btn-link');
-            var removeAllTagsBtnLink = document.getElementById('remove-all-tags-link');
-            var tagsInputLink = document.querySelector('form[action="/submit_link"] input[name="tags"]');
-            var tagsListLink = document.getElementById('tags-display-link');
-            var tagsArrayLink = [];
+        var addTagsBtnLink = document.getElementById('add-tags-btn-link');
+        var removeAllTagsBtnLink = document.getElementById('remove-all-tags-link');
+        var tagsInputLink = document.querySelector('form[action="/submit_link"] input[name="tags"]');
+        var tagsListLink = document.getElementById('tags-display-link');
+        var tagsArrayLink = [];
 
         addTagsBtnLink.addEventListener('click', function() {
-                var tagValue = tagsInputLink.value.trim();
-                if (tagValue !== '') {
-                    tagsArrayLink.push(tagValue);
-                    updateTagsDisplay(tagsListLink, tagsArrayLink);
-                    tagsInputLink.value = '';
-                }
-            });
+            var tagValue = tagsInputLink.value.trim();
+            if (tagValue !== '') {
+                tagsArrayLink.push(tagValue);
+                updateTagsDisplay(tagsListLink, tagsArrayLink);
+                tagsInputLink.value = '';
+            }
+        });
 
         removeAllTagsBtnLink.addEventListener('click', function() {
-                tagsArrayLink = [];
-                updateTagsDisplay(tagsListLink, tagsArrayLink);
-            });
+            tagsArrayLink = [];
+            updateTagsDisplay(tagsListLink, tagsArrayLink);
+        });
 
-        document.querySelector('form[action="/submit_link"]').addEventListener('submit', function() {
+        document.querySelector('form[action="/submit_link"]').addEventListener('submit', function(event) {
+            if (tagsArrayLink.length === 0) {
+                event.preventDefault();
+                alert('Dodaj przynajmniej jeden tag przed wysłaniem formularza.');
+            } else {
                 document.querySelector('form[action="/submit_link"] input[name="tags"]').value = tagsArrayLink.join(' ');
-            });
+            }
+        });
 
-            var addTagsBtnFile = document.getElementById('add-tags-btn-file');
-            var removeAllTagsBtnFile = document.getElementById('remove-all-tags-file');
-            var tagsInputFile = document.querySelector('form[action="/upload_file"] input[name="tags"]');
-            var tagsListFile = document.getElementById('tags-display-file');
-            var tagsArrayFile = [];
+        var addTagsBtnFile = document.getElementById('add-tags-btn-file');
+        var removeAllTagsBtnFile = document.getElementById('remove-all-tags-file');
+        var tagsInputFile = document.querySelector('form[action="/upload_file"] input[name="tags"]');
+        var tagsListFile = document.getElementById('tags-display-file');
+        var tagsArrayFile = [];
 
         addTagsBtnFile.addEventListener('click', function() {
-                var tagValue = tagsInputFile.value.trim();
-                if (tagValue !== '') {
-                    tagsArrayFile.push(tagValue);
-                    updateTagsDisplay(tagsListFile, tagsArrayFile);
-                    tagsInputFile.value = '';
-                }
-            });
+            var tagValue = tagsInputFile.value.trim();
+            if (tagValue !== '') {
+                tagsArrayFile.push(tagValue);
+                updateTagsDisplay(tagsListFile, tagsArrayFile);
+                tagsInputFile.value = '';
+            }
+        });
 
         removeAllTagsBtnFile.addEventListener('click', function() {
-                tagsArrayFile = [];
-                updateTagsDisplay(tagsListFile, tagsArrayFile);
-            });
+            tagsArrayFile = [];
+            updateTagsDisplay(tagsListFile, tagsArrayFile);
+        });
 
-        document.querySelector('form[action="/upload_file"]').addEventListener('submit', function() {
+        document.querySelector('form[action="/upload_file"]').addEventListener('submit', function(event) {
+            if (tagsArrayFile.length === 0) {
+                event.preventDefault();
+                alert('Dodaj przynajmniej jeden tag przed wysłaniem formularza.');
+            } else {
                 document.querySelector('form[action="/upload_file"] input[name="tags"]').value = tagsArrayFile.join(' ');
-            });
-
-            function updateTagsDisplay(tagsList, tagsArray) {
-                tagsList.textContent = 'Dodane tagi: ' + tagsArray.join(', ');
             }
+        });
+
+        function updateTagsDisplay(tagsList, tagsArray) {
+            tagsList.textContent = 'Dodane tagi: ' + tagsArray.join(', ');
+        }
 
             function toDateInputValue(dateObject) {
                 const local = new Date(dateObject);
@@ -240,7 +248,6 @@
                 f.value = toDateInputValue(new Date());
             });
         });
-    </script>
+</script>
 
-
-    {% endblock %}
+{% endblock %}
