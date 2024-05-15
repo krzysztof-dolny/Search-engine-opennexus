@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% set active_page = 'panel' %}
 {% block content %}
 
 <div class="container">
@@ -13,7 +14,9 @@
     </nav>
     <div class="tab-content" id="nav-tabContent">
         <div class="tab-pane fade show active" id="nav-links-list" role="tabpanel" aria-labelledby="nav-links-list-tab">
-            <h1>Wprowadzone materiały</h1>
+            <div class="mt-5 mb-4">
+                <h2>Wprowadzone materiały</h2>
+            </div>
             <form action="/delete_link" method="post">
                 <ul class="list-group">
                     {% for url in urls %}
@@ -133,7 +136,9 @@
         </div>
 
         <div class="tab-pane fade" id="nav-admins" role="tabpanel" aria-labelledby="nav-admins-tab">
-            <h1>Administratorzy</h1>
+            <div class="mt-5 mb-4">
+                <h2>Administratorzy</h2>
+            </div>
             <ul class="list-group">
                 <li class="list-group-item" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom"
                     data-bs-content="Logowania bez kodu">

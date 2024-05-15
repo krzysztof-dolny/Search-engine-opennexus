@@ -3,28 +3,41 @@
 {% block content %}
 
 <div class="container">
-    <h1>Twoje zapytanie:</h1>
-    <form action="/" method="get" class="d-flex align-items-center">
-        <input type="text" name="query" class="form-control ms-1" placeholder="Fraza wyszukiwania" style="width: 50%;">
-
-        <select name="file_type_filter" class="form-select ms-1" style="width: 20%;">
-            <option value="article" {% if request.args.get('file_type_filter') == 'article' %} selected {% endif %}>Artykuł</option>
-            <option value="video" {% if request.args.get('file_type_filter') == 'video' %} selected {% endif %}>Wideo</option>
-            <option value="all" {% if request.args.get('file_type_filter') == 'all' %} selected {% endif %}>Wszystkie</option>
-        </select>
-
-        <select name="date_filter" class="form-select ms-1" style="width: 20%;">
-            <option value="last_month" {% if request.args.get('date_filter') == 'last_month' %} selected {% endif %}>Ostatni miesiąc</option>
-            <option value="last_year" {% if request.args.get('date_filter') == 'last_year' %} selected {% endif %}>Ostatni rok</option>
-            <option value="last_3_years" {% if request.args.get('date_filter') == 'last_3_years' %} selected {% endif %}>Ostatnie 3 lata</option>
-            <option value="all" {% if request.args.get('date_filter') == 'all' %} selected {% endif %}>Wszystkie</option>
-        </select>
-
-        <input type="submit" value="Szukaj" class="btn btn-primary ms-1" style="width: 10%;">
+    <div class="mt-5 mb-4">
+        <h2>Twoje zapytanie</h2>
+    </div>
+    <form action="/" method="get" class="d-flex align-items-end">
+        <div style="width: 50%;">
+            <input type="text" name="query" class="form-control ms-1" placeholder="Fraza wyszukiwania">
+        </div>
+        <div style="width: 20%;">
+            
+            <center><label for="file-type-filter" class="text-secondary mb-1">Typy materiałów</label></center>
+            <select id="file-type-filter" name="file_type_filter" class="form-select ms-1">
+                <option value="all" {% if request.args.get('file_type_filter') == 'all' %} selected {% endif %}>Wszystkie</option>
+                <option value="article" {% if request.args.get('file_type_filter') == 'article' %} selected {% endif %}>Artykuł</option>
+                <option value="video" {% if request.args.get('file_type_filter') == 'video' %} selected {% endif %}>Wideo</option>
+            </select>
+            
+        </div>
+        <div style="width: 20%;">
+            
+            <center><label for="date-filter" class="text-secondary mb-1">Zakres czasowy</label></center>
+            <select id="date-filter" name="date_filter" class="form-select ms-1">
+                <option value="all" {% if request.args.get('date_filter') == 'all' %} selected {% endif %}>Wszystkie</option>
+                <option value="last_month" {% if request.args.get('date_filter') == 'last_month' %} selected {% endif %}>Ostatni miesiąc</option>
+                <option value="last_year" {% if request.args.get('date_filter') == 'last_year' %} selected {% endif %}>Ostatni rok</option>
+                <option value="last_3_years" {% if request.args.get('date_filter') == 'last_3_years' %} selected {% endif %}>Ostatnie 3 lata</option>
+            </select>
+            
+        </div>
+            <input type="submit" value="Szukaj" class="btn btn-primary ms-1" style="width: 10%;">
     </form>
 
     {% if result is defined %}
-    <h1>Wynik:</h1>
+    <div class="mt-5 mb-4">
+        <h2>Wynik</h2>
+    </div>
     <div class="result">
         {% for i in range(result['ids'][0]|length) %}
             {% set id = result['ids'][0][i] %}
@@ -44,14 +57,10 @@
                     <div class="alert">
                         <h3><a href="{{ metadata['source'] }}" class="alert-link">{{ metadata.title }}</a></h3>
                         <p><span class="badge badge-distance">{{ metadata.date }}</span></p>
-                        <!-- <p><span class="badge badge-distance" title="{{ distance }} (distance)">{{ '%.4f'|format(distance) }}</span></p> -->
                         <p>{{ metadata['text']|truncate(500) }}</p>
-                        <!-- <p>
-                            <span class="badge badge-tag">tag_1</span>
-                            <span class="badge badge-tag">tag_2</span>
-                            <span class="badge badge-tag">tag_3</span>
-                            <span class="badge badge-tag">...</span>
-                        </p> -->
+                        <div class="d-flex justify-content-end">
+                            <a href="{{ metadata['source'] }}" class="btn btn-primary">Przejdź</a>
+                        </div>
                         <hr>
                     </div>
                {% endif %}
