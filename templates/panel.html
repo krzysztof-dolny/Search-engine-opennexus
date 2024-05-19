@@ -1,46 +1,258 @@
 {% extends 'base.html' %}
+{% set active_page = 'panel' %}
 {% block content %}
 
 <div class="container">
-    <h1>Wprowadź link do indeksowania:</h1>
-    <form action="/submit_link" method="post" class="d-flex align-items-center">
-        <input type="url" name="link" class="w-100 form-control" placeholder="https://">
-        <input type="submit" value="Dodaj" class="btn btn-primary ms-1">
-    </form>
-    
-    <h1>Automatyczne wprowadzenie danych:</h1>
-    <form action="/add_test_data" method="post">
-        <input type="submit" value="Załaduj testowe dane" class="btn btn-primary">
-    </form>
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <button class="nav-link active" id="nav-links-list-tab" data-bs-toggle="tab"
+                data-bs-target="#nav-links-list" type="button" role="tab" aria-controls="nav-links-list"
+                aria-selected="true">Materiały</button>
+            <button class="nav-link" id="nav-admins-tab" data-bs-toggle="tab" data-bs-target="#nav-admins" type="button"
+                role="tab" aria-controls="nav-admins" aria-selected="false">Administratorzy</button>
+        </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-links-list" role="tabpanel" aria-labelledby="nav-links-list-tab">
+            <div class="mt-5 mb-4">
+                <h2>Wprowadzone materiały</h2>
+            </div>
+            <form action="/delete_link" method="post">
+                <ul class="list-group">
+                    {% for url in urls %}
+                        <li class="list-group-item">
+                            <a href="{{ url }}" target="_blank">
+                                {{ url }}
+                            </a>
+                            <button type="submit" name="url" value="{{ url }}"
+                                class="btn btn-sm btn-danger float-end">Usuń</button>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </form>
 
-    <h1>Wprowadzone linki</h1>
-    <ul class="list-group">
-        {% for url in urls %}
-            <li class="list-group-item">
-                <a href="{{ url }}" target="_blank">
-                    {{ url }}
-                </a>
-            </li>
-        {% endfor %}
-      </ul>
+            <div class="my-2">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-link">
+                    Dodaj nowy materiał...
+                </button>
+            </div>
 
-    <h1>Rejestracja admina</h1>
-    <form action="/register" method="post" class="d-flex align-items-center">
-        <input type="email" required="required" name="email" class="w-100 form-control" placeholder="Adres email">
-        <input type="submit" value="Zarejestruj" class="btn btn-primary ms-1">
-    </form>
+            <div class="modal fade" id="add-link" tabindex="-1" aria-labelledby="add-link-label" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="add-link-label">Dodawanie materiału do indeksowania</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Zamknij"></button>
+                        </div>
 
-    <h1>Administratorzy</h1>
-    <ul class="list-group">
-        <li class="list-group-item" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-content="Logowania bez kodu">
-            <strong><span class="red">*</span> admin@admin.admin</strong>
-        </li>
-        {% for email in emails %}
-            <li class="list-group-item">
-                {{ email }}
-            </li>
-        {% endfor %}
-      </ul>
+                        <div class="modal-body">
+
+                            <div class="nav nav-pills" id="nav-tab" role="tablist">
+                                <button class="nav-link active" id="nav-links-link-tab" data-bs-toggle="tab"
+                                    data-bs-target="#nav-links-link" type="button" role="tab" aria-controls="nav-links-lisk"
+                                    aria-selected="true">Link</button>
+                                <button class="nav-link" id="nav-links-file-tab" data-bs-toggle="tab" data-bs-target="#nav-links-file" type="button"
+                                    role="tab" aria-controls="nav-links-file" aria-selected="false">Plik</button>
+                            </div>
+
+                            <div class="tab-content" id="nav-tabContent">
+
+                                <div class="tab-pane fade show active" id="nav-links-link" role="tabpanel" aria-labelledby="nav-links-link-tab">
+                                    <form action="/submit_link" method="post">
+                                        <div class="my-2">
+                                            <label>
+                                                <h5>Link</h5>
+                                                <input type="url" name="link" class="form-control ms-1" placeholder="https://"
+                                                    style="width:150%;" required>
+                                            </label>
+                                        </div>
+                                        <div class="my-2">
+                                            <label>
+                                                <h5>Data</h5>
+                                                <input type="date" name="date" class="form-control ms-1" required id="material-date">
+                                            </label>
+                                        </div>
+                                        <div class="my-2">
+                                            <h5>Tagi</h5>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <input type="text" name="tags" class="form-control ms-1" placeholder="Dodaj tag">
+                                                <button type="button" id="add-tags-btn-link" class="btn btn-secondary ms-1"
+                                                    style="width: 40%;">Dodaj tag</button>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span id="tags-display-link" class="ms-1 border form-control">Dodane
+                                                    tagi:</span>
+                                                <button type="button" id="remove-all-tags-link" class="btn btn-danger ms-1"
+                                                    style="width: 40%;">Usuń
+                                                    tagi</button>
+                                            </div>
+                                        </div>
+                                        <div class="my-2">
+                                            <input type="submit" value="Dodaj" class="btn btn-primary ms-1" style="width: 20%;">
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <div class="tab-pane fade" id="nav-links-file" role="tabpanel" aria-labelledby="nav-links-file-tab">
+                                    <form action="/upload_file" method="post" enctype="multipart/form-data">
+                                        <div class="my-2">
+                                            <label>
+                                                <h5>Plik</h5>
+                                                <input type="file" name="file" class="form-control ms-1" style="width: 150%;" required>
+                                            </label>
+                                        </div>
+                                        <div class="my-2">
+                                            <label>
+                                                <h5>Data</h5>
+                                                <input type="date" name="date" class="form-control ms-1" required id="material-date">
+                                            </label>
+                                        </div>
+                                        <div class="my-2">
+                                            <h5>Tagi</h5>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <input type="text" name="tags" class="form-control ms-1" placeholder="Dodaj tag">
+                                                <button type="button" id="add-tags-btn-file" class="btn btn-secondary ms-1"
+                                                    style="width: 40%;">Dodaj tag</button>
+                                            </div>
+                                            <div class="d-flex align-items-center mb-2">
+                                                <span id="tags-display-file" class="ms-1 border form-control">Dodane tagi:</span>
+                                                <button type="button" id="remove-all-tags-file" class="btn btn-danger ms-1"
+                                                    style="width: 40%;">Usuń tagi</button>
+                                            </div>
+                                        </div>
+                                        <div class="my-2">
+                                            <input type="submit" value="Dodaj" class="btn btn-primary ms-1" style="width: 20%;">
+                                        </div>
+                                    </form>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-pane fade" id="nav-admins" role="tabpanel" aria-labelledby="nav-admins-tab">
+            <div class="mt-5 mb-4">
+                <h2>Administratorzy</h2>
+            </div>
+            <ul class="list-group">
+                <li class="list-group-item" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom"
+                    data-bs-content="Logowania bez kodu">
+                    <strong><span class="red">*</span> admin@admin.admin</strong>
+                </li>
+                {% for email in emails %}
+                <li class="list-group-item">
+                    {{ email }}
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="my-2">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add-admin">
+                    Dodaj administratora...
+                </button>
+            </div>
+
+            <div class="modal fade" id="add-admin" tabindex="-1" aria-labelledby="add-admin-label" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title" id="add-admin-label">Rejestracja admina</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Zamknij"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="/register" method="post" class="d-flex align-items-center">
+                                <input type="email" required="required" name="email" class="w-100 form-control"
+                                    placeholder="adres@mail.com">
+                                <input type="submit" value="Zarejestruj" class="btn btn-primary ms-1">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var addTagsBtnLink = document.getElementById('add-tags-btn-link');
+        var removeAllTagsBtnLink = document.getElementById('remove-all-tags-link');
+        var tagsInputLink = document.querySelector('form[action="/submit_link"] input[name="tags"]');
+        var tagsListLink = document.getElementById('tags-display-link');
+        var tagsArrayLink = [];
+
+        addTagsBtnLink.addEventListener('click', function() {
+            var tagValue = tagsInputLink.value.trim();
+            if (tagValue !== '') {
+                tagsArrayLink.push(tagValue);
+                updateTagsDisplay(tagsListLink, tagsArrayLink);
+                tagsInputLink.value = '';
+            }
+        });
+
+        removeAllTagsBtnLink.addEventListener('click', function() {
+            tagsArrayLink = [];
+            updateTagsDisplay(tagsListLink, tagsArrayLink);
+        });
+
+        document.querySelector('form[action="/submit_link"]').addEventListener('submit', function(event) {
+            if (tagsArrayLink.length === 0) {
+                event.preventDefault();
+                alert('Dodaj przynajmniej jeden tag przed wysłaniem formularza.');
+            } else {
+                document.querySelector('form[action="/submit_link"] input[name="tags"]').value = tagsArrayLink.join(' ');
+            }
+        });
+
+        var addTagsBtnFile = document.getElementById('add-tags-btn-file');
+        var removeAllTagsBtnFile = document.getElementById('remove-all-tags-file');
+        var tagsInputFile = document.querySelector('form[action="/upload_file"] input[name="tags"]');
+        var tagsListFile = document.getElementById('tags-display-file');
+        var tagsArrayFile = [];
+
+        addTagsBtnFile.addEventListener('click', function() {
+            var tagValue = tagsInputFile.value.trim();
+            if (tagValue !== '') {
+                tagsArrayFile.push(tagValue);
+                updateTagsDisplay(tagsListFile, tagsArrayFile);
+                tagsInputFile.value = '';
+            }
+        });
+
+        removeAllTagsBtnFile.addEventListener('click', function() {
+            tagsArrayFile = [];
+            updateTagsDisplay(tagsListFile, tagsArrayFile);
+        });
+
+        document.querySelector('form[action="/upload_file"]').addEventListener('submit', function(event) {
+            if (tagsArrayFile.length === 0) {
+                event.preventDefault();
+                alert('Dodaj przynajmniej jeden tag przed wysłaniem formularza.');
+            } else {
+                document.querySelector('form[action="/upload_file"] input[name="tags"]').value = tagsArrayFile.join(' ');
+            }
+        });
+
+        function updateTagsDisplay(tagsList, tagsArray) {
+            tagsList.textContent = 'Dodane tagi: ' + tagsArray.join(', ');
+        }
+
+            function toDateInputValue(dateObject) {
+                const local = new Date(dateObject);
+                local.setMinutes(dateObject.getMinutes() - dateObject.getTimezoneOffset());
+                return local.toJSON().slice(0, 10);
+            };
+            let dateFields = document.querySelectorAll('#material-date');
+            dateFields.forEach((f) => {
+                f.value = toDateInputValue(new Date());
+            });
+        });
+</script>
 
 {% endblock %}

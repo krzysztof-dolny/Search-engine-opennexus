@@ -1,3 +1,5 @@
+import os
+import tempfile
 from datetime import datetime, timedelta
 import random
 from app import app, mail, db
@@ -6,7 +8,6 @@ import chromadb
 from chromadb.utils import embedding_functions
 from modules.models import Auth, User
 from modules.scraper import Scrapper
-from modules.sample_texts import tekst1, teks2
 from flask_mail import Mail, Message
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
 
@@ -26,7 +27,7 @@ def index():
         app.logger.info('hello')
         result = collection.query(
             query_texts=[request.args.get('query')],
-            n_results=3,
+            n_results=5,
             include=['documents', 'distances', 'metadatas']
         )
         return render_template('index.html', result=result)
@@ -95,6 +96,15 @@ def get_all_urls():
         lambda meta: meta['source'],
         data
     )
+
+def get_all_tags():
+    data = collection.get(include=['metadatas'])['metadatas']
+
+    return map(
+        lambda meta: meta['tags'],
+        data
+    )
+
 def get_all_emails():
     return map(
         lambda user: user.email,
@@ -104,7 +114,8 @@ def get_all_emails():
 @app.route('/panel', methods=['GET'])
 @login_required
 def panel():
-    return render_template('panel.html', urls=get_all_urls(), emails=get_all_emails())
+    return render_template('panel.html', urls=get_all_urls(), tags=get_all_tags(),
+                           emails=get_all_emails())
 
 # Add link
 @app.route('/submit_link', methods=['POST'])
@@ -112,27 +123,59 @@ def panel():
 def submit_link():
     if request.method == 'POST':
         link: str = request.form['link']
+        date: str = request.form['date']
+        tags = request.form['tags']
 
-        scraped_text: str = Scrapper.scrape_text(link)
+        args = Scrapper.scrape_text_from_link(link)
 
         collection.add(
-            documents=[scraped_text],
-            metadatas=[{'source': link}],
-            ids=[str(collection.count())]
+            documents=[args[1] + ", " + tags],
+            metadatas=[{'source': link, 'title': args[1], 'date': date,
+                        'file_type': args[2], 'tags': tags, 'text': args[0]}],
+            ids=[get_id()]
         )
 
         return redirect('/panel')
 
-@app.route('/add_test_data', methods=['POST'])
-@login_required
-def add_test_data():
-    collection.add(
-        documents=[tekst1, teks2],
-        metadatas=[{'source': 'tekst1'}, {'source': 'tekst2'}],
-        ids=['id_0', 'id_1']
-    )
 
-    return redirect('/panel')
+@app.route('/upload_file', methods=['POST'])
+@login_required
+def upload_file():
+    if request.method == 'POST':
+        file = request.files['file']
+        date = request.form['date']
+        tags = request.form['tags']
+        print(tags)
+        name, extension = os.path.splitext(file.filename)
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            file_path = os.path.join(temp_dir, file.filename)
+            file.save(file_path)
+            scraped_text = Scrapper.scrape_text_from_file(file_path)
+
+            if scraped_text:
+                collection.add(
+                    documents=[file.filename + tags],
+                    metadatas=[{'source': file.filename, 'title': name, 'date': date,
+                                'file_type': extension, 'tags': tags, 'text': scraped_text}],
+                    ids=[get_id()]
+                )
+
+        return redirect('/panel')
+
+
+@app.route('/delete_link', methods=['POST'])
+@login_required
+def delete_link():
+    if request.method == 'POST':
+        url_to_delete = request.form['url']
+
+        collection.delete(
+            where={'source': url_to_delete}
+        )
+
+        return redirect('/panel')
+
 
 # Register
 @app.route('/register', methods=['POST'])
@@ -148,4 +191,24 @@ def register():
             db.session.add(user)
             db.session.commit()
         return redirect('/panel')
-    
+
+
+def get_id():
+    if collection.get(include=[])['ids']:
+        return str(max([int(x) for x in collection.get(include=[])['ids']]) + 1)
+    else:
+        return "1000"
+
+
+@app.context_processor
+def utility_processor():
+    def current_date():
+        return datetime.now().strftime('%Y-%m-%d')
+
+    def parse_date(date_str):
+        return datetime.strptime(date_str, '%Y-%m-%d')
+
+    def get_timedelta(days):
+        return timedelta(days=days)
+
+    return dict(current_date=current_date, parse_date=parse_date, timedelta=get_timedelta)
