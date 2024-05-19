@@ -1,36 +1,68 @@
-## Running
-### Local venv
-1. Configure Python venv.
-2. Install dependencies:
+# Running
+## Debug
+### Linux / MacOS
+
+   ```commandline
+   ./scripts/bash/debug.sh
+   ```
+
+### Windows
+Please notice that it can be slow because of mounting Windows folder into Docker container. You can change it to named volume but it will enforce to use dev container to make changes. You can also use venv in Windows and skip docker.
+
+   ```commandline
+   .\scripts\bash\debug.bat
+   ```
+
+### Venv
+#### Getting started
+1. Install python3 (3.12.3 is recommended)
+2. Create venv
+
+   ```commandline
+   python3 -m venv venv
+   ```
+3. Activate venv
+
+   ```commandline
+   # In cmd.exe
+   venv\Scripts\activate.bat
+   
+   # In PowerShell
+   venv\Scripts\Activate.ps1
+
+   # Linux/MacOS
+   source venv/bin/activate
+   ```
+
+4. Install command-line tool `ffmpeg` ([https://ffmpeg.org/download.html](https://ffmpeg.org/download.html))
+
+5. Create `.env` file - you can just copy `template.env`. In `.env` file are credentials to development SMTP server. Emails will be truly send. 
+
+#### Running
+1. Install dependencies
 
    ```commandline
    pip3 install -r requirements.txt
    ```
-
-3. It also requires the command-line tool `ffmpeg` to be installed on your system.
-4. Create `.env` file - you can just copy `template.env`. In `.env` file are credentials to development SMTP server. Emails will be truly send. 
-5. Run `run.py` file (first time might take longer).
-6. Login with `admin@admin.admin` email and add more admins in panel to test email & code process.
-
-### Docker
-1. First Flask Docker Build:
+2. Run app in debug mode
 
    ```commandline
-   docker build -t flaskimage .
+   python3 -m flask --app ./app run --host=0.0.0.0 --port=5000 --debug
    ```
 
-2. First ChromaDB Image Pull:
+## Release
+### Linux / MacOS
 
    ```commandline
-   docker pull chromadb/chroma
+   ./scripts/bash/release.sh
    ```
 
-3. Run Flask App from Docker.
+### Windows
+Please notice that it can be slow because of mounting Windows folders into Docker container. You can change it to named volumes or use linux filesystem inside Windows.
 
    ```commandline
-   docker run -p 5000:5000
-   docker network create mynetwork
-   docker run -d --network=mynetwork --name=chromadb -p 8000:8000 -v /Users/tim/Dekstop/chroma/:/chroma/chroma chromadb/chroma
-   docker build -t myflaskapp .
-   docker run -d --network=mynetwork --name=myflaskapp -p 5000:5000 myflaskapp
+   .\scripts\bash\release.bat
    ```
+
+# Getting started with admin panel
+Login with `admin@admin.admin` email and add more admins in panel to test email & code process.

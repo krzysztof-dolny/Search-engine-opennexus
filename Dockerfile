@@ -1,14 +1,20 @@
 # Python Image
-FROM python:3.8-slim-buster
+FROM python:3.12.3-bookworm
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+RUN apt update -y && apt install ffmpeg -y
 
-RUN pip3 install -r requirements.txt
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-# Copy Source Code to Container
-COPY . .
+COPY template.env .env
 
-# Run the app
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+COPY static ./static
+COPY modules ./modules
+COPY templates ./templates
+COPY app.py .
+COPY release.py .
+COPY run.sh .
+
+CMD [ "./run.sh"]

@@ -6,12 +6,9 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
 # Load .env file
-load_dotenv(dotenv_path='template.env')
+load_dotenv(dotenv_path='.env')
 
 app = Flask(__name__)
-
-# debug settings
-app.debug = True
 
 # mail configuration
 app.config['MAIL_SERVER'] = os.getenv('MAIL_HOST')
