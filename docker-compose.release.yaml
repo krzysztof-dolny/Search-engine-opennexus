@@ -1,0 +1,13 @@
+services:
+  release_app:
+    build: 
+      dockerfile: Dockerfile
+      context: .
+    volumes:
+      - "./instance:/app/instance"
+      - "./vectordb:/app/vectordb"
+      - "./.env:/app/.env"
+    ports:
+      - "1401:5000"
+    restart: always
+    command: ["./run.sh", "release"]

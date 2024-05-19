@@ -1,12 +1,12 @@
 services:
-  app:
+  debug_app:
     build: 
       dockerfile: Dockerfile
       context: .
     volumes:
       - ".:/app"
+    ports:
+      - "81:5000"
     tty: true
     stdin_open: true
-    ports:
-      - "1401:6969"
-    restart: always
+    command: ["./run.sh", "debug"]

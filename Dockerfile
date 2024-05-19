@@ -1,13 +1,20 @@
 # Python Image
-FROM python:3.11.2
+FROM python:3.12.3-bookworm
 
 WORKDIR /app
 
 RUN apt update -y && apt install ffmpeg -y
 
-COPY requirements.txt requirements.txt
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-RUN pip3 install -r requirements.txt
-RUN pip3 install pysqlite3-binary
+COPY template.env .env
 
-CMD [ "python", "run.py"]
+COPY static ./static
+COPY modules ./modules
+COPY templates ./templates
+COPY app.py .
+COPY release.py .
+COPY run.sh .
+
+CMD [ "./run.sh"]
