@@ -8,7 +8,6 @@ import chromadb
 from chromadb.utils import embedding_functions
 from modules.models import Auth, User
 from modules.scraper import Scrapper
-from modules.sample_texts import tekst1, teks2
 from flask_mail import Mail, Message
 from flask_login import LoginManager, UserMixin, login_required, login_user, logout_user
 
@@ -26,12 +25,10 @@ collection = chroma_client.get_or_create_collection(
 def index():
     if request.method == 'GET' and 'query' in request.args:
         app.logger.info('hello')
-        result = collection.query(
-            query_texts=[request.args.get('query')],
-            n_results=5,
-            include=['documents', 'distances', 'metadatas']
-        )
-        return render_template('index.html', result=result)
+        query = request.args.get('query')
+        result = query_db(query)
+
+        return render_template('index.html', result=result, query=query)
     app.logger.info(request.args.to_dict())
     return render_template('index.html')
 
@@ -91,12 +88,13 @@ def logout():
 
 # panel
 def get_all_urls():
-    data = collection.get(include=['metadatas'])['metadatas']
+    data = []
 
-    return map(
-        lambda meta: meta['source'],
-        data
-    )
+    for item in collection.get(include=['metadatas'])['metadatas']:
+        if item['source'] not in data:
+            data.append(item['source'])
+
+    return data
 
 def get_all_tags():
     data = collection.get(include=['metadatas'])['metadatas']
@@ -115,7 +113,8 @@ def get_all_emails():
 @app.route('/panel', methods=['GET'])
 @login_required
 def panel():
-    return render_template('panel.html', urls=get_all_urls(), tags=get_all_tags(), emails=get_all_emails())
+    return render_template('panel.html', urls=get_all_urls(), tags=get_all_tags(),
+                           emails=get_all_emails())
 
 # Add link
 @app.route('/submit_link', methods=['POST'])
@@ -125,24 +124,40 @@ def submit_link():
         link: str = request.form['link']
         date: str = request.form['date']
         tags = request.form['tags']
-
         args = Scrapper.scrape_text_from_link(link)
 
         collection.add(
-            documents=[tags + " " + args[0]],
-            metadatas=[{'source': link, 'title': args[1], 'date': date, 'file_type': args[2], 'tags': tags}],
-            ids=[str(collection.count())]
+            documents=[args[1]],
+            metadatas=[{'source': link, 'title': args[1], 'date': date,
+                        'file_type': args[2], 'tags': tags, 'text': ' '.join(args[0])}],
+            ids=[get_id()]
         )
+
+        collection.add(
+            documents=[' '.join(f'#{word}' for word in tags.split())],
+            metadatas=[{'source': link, 'title': args[1], 'date': date,
+                        'file_type': args[2], 'tags': tags, 'text': ' '.join(args[0])}],
+            ids=[get_id()]
+        )
+
+        for text in args[0]:
+            collection.add(
+                documents=[text],
+                metadatas=[{'source': link, 'title': args[1], 'date': date,
+                            'file_type': args[2], 'tags': tags, 'text': ' '.join(args[0])}],
+                ids=[get_id()]
+            )
 
         return redirect('/panel')
 
+
 @app.route('/upload_file', methods=['POST'])
+@login_required
 def upload_file():
     if request.method == 'POST':
         file = request.files['file']
         date = request.form['date']
         tags = request.form['tags']
-
         name, extension = os.path.splitext(file.filename)
 
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -150,25 +165,44 @@ def upload_file():
             file.save(file_path)
             scraped_text = Scrapper.scrape_text_from_file(file_path)
 
+            collection.add(
+                documents=[name],
+                metadatas=[{'source': file.filename, 'title': name, 'date': date,
+                            'file_type': extension, 'tags': tags, 'text': ' '.join(scraped_text)}],
+                ids=[get_id()]
+            )
+
+            collection.add(
+                documents=[' '.join(f'#{word}' for word in tags.split())],
+                metadatas=[{'source': file.filename, 'title': name, 'date': date,
+                            'file_type': extension, 'tags': tags, 'text': ' '.join(scraped_text)}],
+                ids=[get_id()]
+            )
+
             if scraped_text:
-                collection.add(
-                    documents=[tags + " " + scraped_text],
-                    metadatas=[{'source': file.filename, 'title': name, 'date': date, 'file_type': extension, 'tags': tags}],
-                    ids=[str(collection.count())]
-                )
+                for text in scraped_text:
+                    collection.add(
+                        documents=[text],
+                        metadatas=[{'source': file.filename, 'title': name, 'date': date,
+                                    'file_type': extension, 'tags': tags, 'text': ' '.join(scraped_text)}],
+                        ids=[get_id()]
+                    )
 
         return redirect('/panel')
 
-@app.route('/add_test_data', methods=['POST'])
-@login_required
-def add_test_data():
-    collection.add(
-        documents=[tekst1, teks2],
-        metadatas=[{'source': 'tekst1'}, {'source': 'tekst2'}],
-        ids=['id_0', 'id_1']
-    )
 
-    return redirect('/panel')
+@app.route('/delete_link', methods=['POST'])
+@login_required
+def delete_link():
+    if request.method == 'POST':
+        url_to_delete = request.form['url']
+
+        collection.delete(
+            where={'source': url_to_delete}
+        )
+
+        return redirect('/panel')
+
 
 # Register
 @app.route('/register', methods=['POST'])
@@ -184,6 +218,46 @@ def register():
             db.session.add(user)
             db.session.commit()
         return redirect('/panel')
+
+
+def query_db(query):
+    result = {'ids': [[]], 'distances': [[]], 'metadatas': [[]], 'embeddings': None,
+              'documents': [[]], 'uris': None, 'data': None}
+    sources = [""]
+
+    for i in range(5):
+        _result = collection.query(
+            query_texts=[query],
+            n_results=1,
+            include=['documents', 'distances', 'metadatas'],
+            where={
+                "source": {
+                    "$nin": sources
+                }
+            }
+        )
+
+        if _result['ids'][0]:
+            sources.append(_result['metadatas'][0][0]['source'])
+
+            for key in _result:
+                if _result[key]:
+                    if key in result:
+                        _data: list = _result[key][0]
+                        result[key][0].extend(_data)
+                    else:
+                        result[key][0] = _result[key]
+        else:
+            break
+
+    return result
+
+
+def get_id():
+    if collection.get(include=[])['ids']:
+        return str(max([int(x) for x in collection.get(include=[])['ids']]) + 1)
+    else:
+        return "1000"
 
 
 @app.context_processor

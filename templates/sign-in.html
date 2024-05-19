@@ -4,7 +4,9 @@
 {% block content %}
 
 <div class="container">
-    <h1>Logowanie</h1>
+    <div class="mt-5 mb-4">
+        <h2>Logowanie</h2>
+    </div>
     <form action="/sign-in" method="post" class="d-flex align-items-center">
         <input type="email" name="email" class="w-100 form-control" placeholder="Adres email"{% if email is defined %} value="{{ email }}"{% endif %}>
         {% if email is defined %}
