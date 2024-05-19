@@ -31,10 +31,11 @@ Please notice that it can be slow because of mounting Windows folder into Docker
    venv\Scripts\Activate.ps1
 
    # Linux/MacOS
-   source myvenv/bin/activate
+   source venv/bin/activate
    ```
 
 4. Install command-line tool `ffmpeg` ([https://ffmpeg.org/download.html](https://ffmpeg.org/download.html))
+
 5. Create `.env` file - you can just copy `template.env`. In `.env` file are credentials to development SMTP server. Emails will be truly send. 
 
 #### Running
