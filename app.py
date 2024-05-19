@@ -6,7 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
 # Load .env file
-# load_dotenv(dotenv_path='template.env')
+load_dotenv(dotenv_path='template.env')
 
 app = Flask(__name__)
 

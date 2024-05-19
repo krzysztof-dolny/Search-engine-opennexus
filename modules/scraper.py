@@ -75,9 +75,9 @@ class Scrapper:
                         if el.parent.get('class')[0] == 'tdb-block-inner':
                             text_list.append(el.get_text().strip())
 
-                text = ' '.join(text_list)
+                # text = ' '.join(text_list)
 
-                return [text, title]
+                return [text_list, title]
 
             else:
                 return "Nie udało się pobrać strony. Spróbuj ponownie później."
@@ -94,7 +94,9 @@ class Scrapper:
                 audio.download(output_path=temp_dir, filename="audio.mp3")
                 file_path = os.path.join(temp_dir, 'audio.mp3')
 
-                result = Scrapper.audio_to_text_function(file_path)
+                _result = Scrapper.audio_to_text_function(file_path)
+                result = Scrapper.split_text(_result, 3)
+
                 title = yt.title
 
                 return [result, title]
@@ -105,7 +107,8 @@ class Scrapper:
     @staticmethod
     def scrape_text_from_mp3_file(file_path):
         try:
-            result = Scrapper.audio_to_text_function(file_path)
+            _result = Scrapper.audio_to_text_function(file_path)
+            result = Scrapper.split_text(_result, 3)
 
             return result
 
@@ -121,7 +124,8 @@ class Scrapper:
                 audio = clip.audio
                 audio.write_audiofile(mp3_file_path, verbose=False)
 
-            result = Scrapper.audio_to_text_function(mp3_file_path)
+            _result = Scrapper.audio_to_text_function(mp3_file_path)
+            result = Scrapper.split_text(_result, 3)
 
             return result
 
@@ -131,10 +135,20 @@ class Scrapper:
     @staticmethod
     def audio_to_text_function(file_path):
         try:
-            model = whisper.load_model("small")
+            model = whisper.load_model("medium")
             result = model.transcribe(file_path, fp16=False, language="pl")
 
             return result["text"]
 
         except Exception as e:
             return f"Wystąpił błąd: {str(e)}"
+
+    @staticmethod
+    def split_text(text, number_of_sentences):
+        sentences = re.split(r'(?<=[.!?])\s+', text)
+
+        grouped_sentences = []
+        for i in range(0, len(sentences), number_of_sentences):
+            grouped_sentences.append(' '.join(sentences[i:i + number_of_sentences]))
+
+        return grouped_sentences
