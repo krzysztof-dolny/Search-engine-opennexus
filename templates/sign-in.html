@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% set active_page = 'sign-in' %}
+
+{% block content %}
+
+<div class="container">
+    <h1>Logowanie</h1>
+    <form action="/sign-in" method="post" class="d-flex align-items-center">
+        <input type="email" name="email" class="w-100 form-control" placeholder="Adres email"{% if email is defined %} value="{{ email }}"{% endif %}>
+        {% if email is defined %}
+        <input type="text" name="code" minlength="6" maxlength="6" class="w-100 ms-1 form-control" placeholder="Kod dostępu z maila">
+        {% endif %}
+        <input type="submit" value="{% if email is defined %}Zaloguj się{% else %}Wyślij kod{% endif %}" class="btn btn-primary ms-1">
+    </form>
+</div>
+
+{% endblock %}

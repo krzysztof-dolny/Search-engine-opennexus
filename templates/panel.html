@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container">
+    <h1>Wprowadź link do indeksowania:</h1>
+    <form action="/submit_link" method="post" class="d-flex align-items-center">
+        <input type="url" name="link" class="w-100 form-control" placeholder="https://">
+        <input type="submit" value="Dodaj" class="btn btn-primary ms-1">
+    </form>
+    
+    <h1>Automatyczne wprowadzenie danych:</h1>
+    <form action="/add_test_data" method="post">
+        <input type="submit" value="Załaduj testowe dane" class="btn btn-primary">
+    </form>
+
+    <h1>Wprowadzone linki</h1>
+    <ul class="list-group">
+        {% for url in urls %}
+            <li class="list-group-item">
+                <a href="{{ url }}" target="_blank">
+                    {{ url }}
+                </a>
+            </li>
+        {% endfor %}
+      </ul>
+
+    <h1>Rejestracja admina</h1>
+    <form action="/register" method="post" class="d-flex align-items-center">
+        <input type="email" required="required" name="email" class="w-100 form-control" placeholder="Adres email">
+        <input type="submit" value="Zarejestruj" class="btn btn-primary ms-1">
+    </form>
+
+    <h1>Administratorzy</h1>
+    <ul class="list-group">
+        <li class="list-group-item" data-bs-toggle="popover" data-bs-trigger="hover" data-bs-placement="bottom" data-bs-content="Logowania bez kodu">
+            <strong><span class="red">*</span> admin@admin.admin</strong>
+        </li>
+        {% for email in emails %}
+            <li class="list-group-item">
+                {{ email }}
+            </li>
+        {% endfor %}
+      </ul>
+</div>
+
+{% endblock %}

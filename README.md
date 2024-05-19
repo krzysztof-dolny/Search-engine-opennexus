@@ -5,8 +5,9 @@
 pip3 install -r requirements.txt
 ```
 ### 3.It also requires the command-line tool ffmpeg to be installed on your system
-### 4. run 'run.py' file (first time might take longer)
-
+### 4.create `.env` file - you can just copy `template.env`. In `.env` file are credentials to development SMTP server. Emails will be truly send.
+### 5. run 'run.py' file (first time might take longer)
+### 6. Login with `admin@admin.admin` email and add more admins in panel to test email&code process
 
 
 
