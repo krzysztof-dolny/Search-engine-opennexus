@@ -38,13 +38,16 @@ Please notice that it can be slow because of mounting Windows folder into Docker
 
 5. Create `.env` file - you can just copy `template.env`. In `.env` file are credentials to development SMTP server. Emails will be truly send. 
 
-#### Running
-1. Install dependencies
+6. Install dependencies
 
    ```commandline
    pip3 install -r requirements.txt
    ```
-2. Run app in debug mode
+
+7. Replace `venv/lib/$python/site-packages/pytube/cipher.py` with `pytube/cipher.py` where `$python` is your python version e.g. `python3.11`.
+
+#### Running
+1. Run app in debug mode
 
    ```commandline
    python3 -m flask --app ./app run --host=0.0.0.0 --port=5000 --debug
